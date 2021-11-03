@@ -15,7 +15,7 @@ endif
 all: fmt build start
 
 build:
-	GOOS=$(OS) GOARCH="$(GOARCH)" go build -o vault/plugins/vault-plugin-secrets-mock cmd/vault-plugin-secrets-mock/main.go
+	GOOS=$(OS) GOARCH="$(GOARCH)" go build -o vault/plugins/cyder-vault-plugin-secrets-mock cmd/vault-plugin-secrets-mock/main.go
 
 start:
 	vault server -dev -dev-root-token-id=root -dev-plugin-dir=./vault/plugins

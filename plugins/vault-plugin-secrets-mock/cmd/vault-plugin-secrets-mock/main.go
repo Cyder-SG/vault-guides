@@ -3,8 +3,9 @@ package main
 import (
 	"os"
 
+	mock "cydersg/vault-plugin-secrets-mock"
+
 	"github.com/hashicorp/go-hclog"
-	mock "github.com/hashicorp/vault-guides/plugins/vault-plugin-secrets-mock"
 	"github.com/hashicorp/vault/api"
 	"github.com/hashicorp/vault/sdk/plugin"
 )
