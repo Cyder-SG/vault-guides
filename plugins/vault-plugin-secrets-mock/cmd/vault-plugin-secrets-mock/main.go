@@ -3,7 +3,7 @@ package main
 import (
 	"os"
 
-	mock "cydersg/vault-plugin-secrets-mock"
+	mockmockmock "cydersg/vault-plugin-secrets-mock"
 
 	"github.com/hashicorp/go-hclog"
 	"github.com/hashicorp/vault/api"
@@ -19,7 +19,7 @@ func main() {
 	tlsProviderFunc := api.VaultPluginTLSProvider(tlsConfig)
 
 	err := plugin.Serve(&plugin.ServeOpts{
-		BackendFactoryFunc: mock.Factory,
+		BackendFactoryFunc: mockmockmock.Factory,
 		TLSProviderFunc:    tlsProviderFunc,
 	})
 	if err != nil {

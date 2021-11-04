@@ -11,7 +11,7 @@ import (
 )
 
 // Factory returns a new backend as logical.Backend
-func Factory(ctx context.Context, conf *logical.BackendConfig) (logical.Backend, error) {
+func CyderFactory(ctx context.Context, conf *logical.BackendConfig) (logical.Backend, error) {
 	b := backend()
 	if err := b.Setup(ctx, conf); err != nil {
 		return nil, err
@@ -43,7 +43,11 @@ func backend() *hashiCupsBackend {
 				"role/*",
 			},
 		},
-		Paths:       framework.PathAppend(),
+		Paths: framework.PathAppend(
+			[]*framework.Path{
+				pathConfig(&b),
+			},
+		),
 		Secrets:     []*framework.Secret{},
 		BackendType: logical.TypeLogical,
 		Invalidate:  b.invalidate,

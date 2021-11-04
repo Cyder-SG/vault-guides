@@ -27,7 +27,7 @@ func getTestBackend(tb testing.TB) (*hashiCupsBackend, logical.Storage) {
 	config.Logger = hclog.NewNullLogger()
 	config.System = logical.TestSystemView()
 
-	b, err := Factory(context.Background(), config)
+	b, err := CyderFactory(context.Background(), config)
 	if err != nil {
 		tb.Fatal(err)
 	}

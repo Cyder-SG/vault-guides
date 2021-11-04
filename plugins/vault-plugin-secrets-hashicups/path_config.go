@@ -2,6 +2,7 @@ package secretsengine
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/hashicorp/vault/sdk/framework"
@@ -28,9 +29,50 @@ type hashiCupsConfig struct {
 // when you read the configuration.
 func pathConfig(b *hashiCupsBackend) *framework.Path {
 	return &framework.Path{
-		Pattern:         "config",
-		Fields:          map[string]*framework.FieldSchema{},
-		Operations:      map[logical.Operation]framework.OperationHandler{},
+		Pattern: "config",
+		Fields: map[string]*framework.FieldSchema{
+			"username": {
+				Type:        framework.TypeString,
+				Description: "The username to access HashiCups Product API",
+				Required:    true,
+				DisplayAttrs: &framework.DisplayAttributes{
+					Name:      "Username",
+					Sensitive: false,
+				},
+			},
+			"password": {
+				Type:        framework.TypeString,
+				Description: "The user's password to access HashiCups Product API",
+				Required:    true,
+				DisplayAttrs: &framework.DisplayAttributes{
+					Name:      "Password",
+					Sensitive: true,
+				},
+			},
+			"url": {
+				Type:        framework.TypeString,
+				Description: "The URL for the HashiCups Product API",
+				Required:    true,
+				DisplayAttrs: &framework.DisplayAttributes{
+					Name:      "URL",
+					Sensitive: false,
+				},
+			},
+		},
+		Operations: map[logical.Operation]framework.OperationHandler{
+			logical.ReadOperation: &framework.PathOperation{
+				Callback: b.pathConfigRead,
+			},
+			logical.CreateOperation: &framework.PathOperation{
+				Callback: b.pathConfigWrite,
+			},
+			logical.UpdateOperation: &framework.PathOperation{
+				Callback: b.pathConfigWrite,
+			},
+			logical.DeleteOperation: &framework.PathOperation{
+				Callback: b.pathConfigDelete,
+			},
+		},
 		ExistenceCheck:  b.pathConfigExistenceCheck,
 		HelpSynopsis:    pathConfigHelpSynopsis,
 		HelpDescription: pathConfigHelpDescription,
@@ -45,6 +87,20 @@ func (b *hashiCupsBackend) pathConfigExistenceCheck(ctx context.Context, req *lo
 	}
 
 	return out != nil, nil
+}
+
+func (b *hashiCupsBackend) pathConfigRead(ctx context.Context, req *logical.Request, data *framework.FieldData) (*logical.Response, error) {
+	config, err := getConfig(ctx, req.Storage)
+	if err != nil {
+		return nil, err
+	}
+
+	return &logical.Response{
+		Data: map[string]interface{}{
+			"username": config.Username,
+			"url":      config.URL,
+		},
+	}, nil
 }
 
 func getConfig(ctx context.Context, s logical.Storage) (*hashiCupsConfig, error) {
@@ -78,3 +134,60 @@ You must sign up with a username and password and
 specify the HashiCups address for the products API
 before using this secrets backend.
 `
+
+func (b *hashiCupsBackend) pathConfigWrite(ctx context.Context, req *logical.Request, data *framework.FieldData) (*logical.Response, error) {
+	config, err := getConfig(ctx, req.Storage)
+	if err != nil {
+		return nil, err
+	}
+
+	createOperation := (req.Operation == logical.CreateOperation)
+
+	if config == nil {
+		if !createOperation {
+			return nil, errors.New("config not found during update operation")
+		}
+		config = new(hashiCupsConfig)
+	}
+
+	if username, ok := data.GetOk("username"); ok {
+		config.Username = username.(string)
+	} else if !ok && createOperation {
+		return nil, fmt.Errorf("missing username in configuration")
+	}
+
+	if url, ok := data.GetOk("url"); ok {
+		config.URL = url.(string)
+	} else if !ok && createOperation {
+		return nil, fmt.Errorf("missing url in configuration")
+	}
+
+	if password, ok := data.GetOk("password"); ok {
+		config.Password = password.(string)
+	} else if !ok && createOperation {
+		return nil, fmt.Errorf("missing password in configuration")
+	}
+
+	entry, err := logical.StorageEntryJSON(configStoragePath, config)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := req.Storage.Put(ctx, entry); err != nil {
+		return nil, err
+	}
+
+	b.reset()
+
+	return nil, nil
+}
+
+func (b *hashiCupsBackend) pathConfigDelete(ctx context.Context, req *logical.Request, data *framework.FieldData) (*logical.Response, error) {
+	err := req.Storage.Delete(ctx, configStoragePath)
+
+	if err == nil {
+		b.reset()
+	}
+
+	return nil, err
+}

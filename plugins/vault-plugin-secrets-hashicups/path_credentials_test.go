@@ -24,7 +24,7 @@ func newAcceptanceTestEnv() (*testEnv, error) {
 		},
 		Logger: logging.NewVaultLogger(log.Debug),
 	}
-	b, err := Factory(ctx, conf)
+	b, err := CyderFactory(ctx, conf)
 	if err != nil {
 		return nil, err
 	}
