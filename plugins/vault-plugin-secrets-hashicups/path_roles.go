@@ -13,6 +13,7 @@ import (
 // for a Vault role to access and call the HashiCups
 // token endpoints
 type hashiCupsRoleEntry struct {
+	Name     string        `json:"name"`
 	Username string        `json:"username"`
 	UserID   int           `json:"user_id"`
 	Token    string        `json:"token"`

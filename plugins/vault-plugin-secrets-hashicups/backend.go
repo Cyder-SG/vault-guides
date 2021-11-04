@@ -47,6 +47,7 @@ func backend() *hashiCupsBackend {
 			pathRole(&b),
 			[]*framework.Path{
 				pathConfig(&b),
+				pathCredentials(&b),
 			},
 		),
 		Secrets: []*framework.Secret{
