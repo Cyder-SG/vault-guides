@@ -76,3 +76,4 @@ logins in the [products API](https://github.com/hashicorp-demoapp/product-api-go
 
 - [Upgrading Plugins](https://www.vaultproject.io/docs/upgrading/plugins)
 - [List of Vault Plugins](https://www.vaultproject.io/docs/plugin-portal)
+- [Custom Secret Engine](https://learn.hashicorp.com/tutorials/vault/custom-secrets-engine-build?in=vault/custom-secrets-engine)
